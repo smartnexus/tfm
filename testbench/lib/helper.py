@@ -2,8 +2,36 @@ import wave
 import pyaudio
 import threading
 import sys
+import time
 
 CHUNK = 1024
+
+def input(stream, data_list, rate, seconds):
+  for _ in range(0, int(rate / CHUNK * seconds)):
+    data_list.append(stream.read(CHUNK))
+
+def stream_audio(seconds, delay):
+  WIDTH = 2
+  CHANNELS = 1
+  RATE = 44100
+
+  p = pyaudio.PyAudio()
+
+  stream = p.open(format=p.get_format_from_width(WIDTH), channels=CHANNELS, rate=RATE, input=True, output=True, frames_per_buffer=CHUNK)
+
+  data_list = []
+  in_thread = threading.Thread(target=input, args=(stream, data_list, RATE, seconds))
+  in_thread.start()
+
+  time.sleep(delay)
+
+  for i in range(0, int(RATE / CHUNK * seconds)):
+    stream.write(data_list[i], CHUNK)  
+
+  stream.stop_stream()
+  stream.close()
+
+  p.terminate()
 
 def play_audio(audio_file, channel_map):
 	stream_info = pyaudio.PaMacCoreStreamInfo(
