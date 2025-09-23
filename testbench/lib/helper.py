@@ -3,6 +3,7 @@ import pyaudio
 import threading
 import sys
 import time
+import numpy as np
 
 CHUNK = 1024
 
@@ -32,6 +33,28 @@ def stream_audio(seconds, delay):
   stream.close()
 
   p.terminate()
+
+def play_audio_with_error(audio_file, channel_map, error_prob):
+  stream_info = pyaudio.PaMacCoreStreamInfo(
+      flags=pyaudio.PaMacCoreStreamInfo.paMacCorePlayNice,
+      channel_map=channel_map)
+
+  with wave.open(audio_file, 'rb') as wf:
+    loop_count = wf.getnframes() // CHUNK
+    distrib = np.random.binomial(1, 1 - error_prob, loop_count)
+    p = pyaudio.PyAudio()
+
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()), channels=wf.getnchannels(), rate=wf.getframerate(), output_host_api_specific_stream_info=stream_info, output=True)
+
+    for i in range(loop_count):
+      data = wf.readframes(CHUNK)
+      if distrib[i] == 1:
+        stream.write(data)
+      else:
+        stream.write(b'\x00' * len(data))
+
+    stream.close()
+    p.terminate()
 
 def play_audio(audio_file, channel_map):
 	stream_info = pyaudio.PaMacCoreStreamInfo(
