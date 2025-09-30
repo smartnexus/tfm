@@ -5,6 +5,8 @@ Mediante un conjunto de pruebas definidas, se pretende obtener como resultado un
 
 Por último, con el fin de garantizar la veracidad de resultados es deseable que los participantes tengan una mínima formación musical.
 
+**Izquierda sin retraso, derecha con retraso.**
+
 ## Participantes necesarios
 | Código de la prueba | número |
 |---|---|
